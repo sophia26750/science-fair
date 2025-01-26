@@ -28,9 +28,10 @@ except ValueError:
 
 
 try: 
-    for i in range(num_stocks):  
-        str_returns = st.text_input(f"Enter the expected return of {i + 1} Stocks:", key = f"num {i} ")  
-        returns = float(str_returns)                                   
+
+    returns = [st.number_input(f"Enter the expected return of {i + 1} Stocks:", key = f"num {i} ")
+                                for i in range(num_stocks)]  
+    # returns = float(str_returns)                                   
 except NameError:
     st.markdown("#### Please enter number of stocks to continue!")
 except ValueError:
@@ -40,9 +41,10 @@ except ValueError:
 
 
 try:
-    for i in range(num_stocks):
-        str_std_devs = st.text_input(f"Enter the standard deviation of Stock {i + 1}: ", key = f"num {i + num_stocks} ")
-        std_devs = float(str_std_devs)
+    
+    std_devs = [st.number_input(f"Enter the standard deviation of Stock {i + 1}: ", key = f"num {i + num_stocks} ")
+                    for i in range(num_stocks)]
+    # std_devs = float(str_std_devs)
 except NameError:
     st.markdown(" ")
 except ValueError:
