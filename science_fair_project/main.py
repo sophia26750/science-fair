@@ -60,23 +60,30 @@ except NameError:
 except ValueError:
     st.markdown(" ")
 
-# Specify the initial guess for weights
-initial_weights = np.zeros(num_stocks)
 
-# Specify bounds for weights
-weight_bounds = [[0, 1]] * num_stocks
 
-# Define the constraints as a list of dictionaries
-constraints = [{'type': 'eq', 'fun': budget_constraint}, 
-            {'type': 'ineq', 'fun': risk_constraint}]
+try: 
+    # Specify the initial guess for weights
+    initial_weights = np.zeros(num_stocks)
 
-# Execute the optimization
-result = minimize(maximize_expected_return, initial_weights, method='SLSQP', 
-                constraints=constraints, bounds=weight_bounds, 
-                options={'ftol': 1e-6})
+    # Specify bounds for weights
+    weight_bounds = [[0, 1]] * num_stocks
 
-# Print results
-st.write("\nOptimal stock weighting:")
-st.write([round(weight, 5) for weight in result.x])
-st.write("\nMaximum expected return, as a percentage:")
-st.write(round(-result.fun, 5))
+    # Define the constraints as a list of dictionaries
+    constraints = [{'type': 'eq', 'fun': budget_constraint}, 
+                {'type': 'ineq', 'fun': risk_constraint}]
+
+    # Execute the optimization
+    result = minimize(maximize_expected_return, initial_weights, method='SLSQP', 
+                    constraints=constraints, bounds=weight_bounds, 
+                    options={'ftol': 1e-6})
+
+    # Print results
+    st.write("\nOptimal stock weighting:")
+    st.write([round(weight, 5) for weight in result.x])
+    st.write("\nMaximum expected return, as a percentage:")
+    st.write(round(-result.fun, 5))
+except NameError:
+    st.markdown(" ")
+except ValueError:
+    st.markdown(" ")

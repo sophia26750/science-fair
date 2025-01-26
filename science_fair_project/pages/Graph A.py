@@ -1,5 +1,8 @@
+import streamlit as st  
 import matplotlib.pyplot as plt
 import numpy as np
+
+st.markdown("## Graph of Portfolio Risk as a Function of Proportion of Stock A")
 
 # Set the x-coordinates from 0 to 1 with a step size of 0.01
 x = np.arange(0, 1, 0.01)
@@ -26,5 +29,7 @@ plt.plot(lowest_point_x, lowest_point_y, 'ro')
 plt.annotate(f'({lowest_point_x:.2f}, {lowest_point_y:.2f})', (lowest_point_x, lowest_point_y),
              textcoords="offset points", xytext=(4, 10), ha='center')
 
+
 # Display the plot
-plt.show()
+st.pyplot(plt)
+# plt.show()
