@@ -1,30 +1,57 @@
-import matplotlib.pyplot as plt
 import numpy as np
+from scipy.optimize import minimize
 
-# Set the x-coordinates from 0 to 1 with a step size of 0.01
-x = np.arange(0, 1, 0.01)
+# Input the number of stocks in the portfolio
+num_stocks = int(input("Enter the number of stocks in the portfolio: "))
 
-# Calculate the corresponding y-coordinates
-y = np.sqrt(100 * x ** 2 + 400 * (1 - x) ** 2)
+# Create a list of expected stock returns
+returns = [float(input(f"Enter the expected return of Stock {i + 1}: ")) 
+           for i in range(num_stocks)]
 
-# Find the lowest point on the graph
-lowest_point_idx = np.argmin(y)
-lowest_point_x = x[lowest_point_idx]
-lowest_point_y = y[lowest_point_idx]
+# Create a list of stock standard deviations
+std_devs = [float(input(f"Enter the standard deviation of Stock {i + 1}: ")) 
+            for i in range(num_stocks)]
 
-# Set labels for the plot
-plt.xlabel('Weight of Stock A')
-plt.ylabel('Portfolio Risk (%)')
+# Input the portfolio risk tolerance (try lowering it for more diversification)
+risk_tolerance = float(input("Enter the risk tolerance: "))
 
-# Plot the points
-plt.plot(x, y)
+# Modify the objective function to encourage diversification
+def maximize_expected_return(weights):
+    # The negative sign ensures we are maximizing the return
+    return -np.dot(weights, returns) + 0.1 * np.sum(np.square(weights - 1/num_stocks)) + 100 * np.sum(np.abs(weights - 0.5))  # Stronger penalty
 
-# Mark the lowest point on the graph
-plt.plot(lowest_point_x, lowest_point_y, 'ro')
+# Define the budget constraint
+def budget_constraint(weights):
+    return np.sum(weights) - 1
 
-# Annotate the coordinates of the lowest point
-plt.annotate(f'({lowest_point_x:.2f}, {lowest_point_y:.2f})', (lowest_point_x, lowest_point_y),
-             textcoords="offset points", xytext=(4, 10), ha='center')
+# Define the risk constraint
+def risk_constraint(weights):
+    portfolio_risk = np.dot(np.square(weights), np.square(std_devs))
+    return - (portfolio_risk - risk_tolerance ** 2)
 
-# Display the plot
-plt.show()
+# Specify the initial guess for weights (balanced portfolio as a starting point)
+initial_weights = np.ones(num_stocks) / num_stocks  # Equal initial weights
+
+# Specify bounds for weights
+weight_bounds = [[0, 1]] * num_stocks
+
+# Define the constraints as a list of dictionaries
+constraints = [{'type': 'eq', 'fun': budget_constraint}, 
+               {'type': 'ineq', 'fun': risk_constraint}]
+
+constraints = [
+    {'type': 'eq', 'fun': budget_constraint},
+    {'type': 'ineq', 'fun': risk_constraint},
+]
+
+
+# Execute the optimization with more iterations and higher precision
+result = minimize(maximize_expected_return, initial_weights, method='SLSQP', 
+                  constraints=constraints, bounds=weight_bounds, 
+                  options={'ftol': 1e-6, 'maxiter': 10000})  # Increased max iterations
+
+# Print results
+print("\nOptimal stock weighting:")
+print([round(weight, 5) for weight in result.x])
+print("\nMaximum expected return, as a percentage:")
+print(round(-result.fun, 5))

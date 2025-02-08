@@ -15,7 +15,7 @@ def risk_constraint(weights):
     portfolio_risk = np.dot(np.square(weights), np.square(std_devs))
     return - (portfolio_risk - risk_tolerance ** 2)
 
-st.markdown("# Lagragian Multipliers for Uncorrelated stocks")
+st.markdown("# Lagrangian Multipliers for Uncorrelated stocks")
 st.markdown("---")
 
 # Input the number of stocks in the portfolio
