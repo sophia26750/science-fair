@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.optimize import minimize
 
+
 # Modify the objective function to encourage diversification and balance
 def maximize_expected_return(weights):
     diversification_penalty = 0.05 * np.sum(np.square(weights - 1/num_stocks))  # Weakened but still encouraging diversification

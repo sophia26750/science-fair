@@ -1,17 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.optimize import minimize
 
 # Function to calculate portfolio risk for a given set of weights
 def calculate_portfolio_risk(weights, std_devs):
     # Portfolio risk formula: sqrt(w1^2 * sigma1^2 + w2^2 * sigma2^2 + ...)
     return np.sqrt(np.sum(np.square(weights) * np.square(std_devs)))
 
-import numpy as np
-from scipy.optimize import minimize
-
 # Modify the objective function to encourage diversification and balance
 def maximize_expected_return(weights):
-    diversification_penalty = 0.05 * np.sum(np.square(weights - 1/num_stocks))  # Weakened but still encouraging diversification
+    diversification_penalty = 0.05 * np.sum(np.square(weights - 1 / num_stocks))  # Weakened but still encouraging diversification
     return -np.dot(weights, returns) + diversification_penalty  # Maximize return
 
 # Define the budget constraint
@@ -50,8 +48,6 @@ std_devs = [float(input(f"Enter the standard deviation of Stock {i + 1}: "))
 # Input the portfolio risk tolerance
 risk_tolerance = float(input("Enter the risk tolerance: "))
 
-
-
 # Specify the initial guess for weights (balanced portfolio as a starting point)
 initial_weights = np.ones(num_stocks) / num_stocks  # Equal initial weights
 
@@ -79,17 +75,17 @@ print(optimized_weights)
 print("\nMaximum expected return, as a percentage:")
 print(round(-result.fun, 5))
 
+# Calculate the risk of the optimized portfolio
 optimized_risk = calculate_portfolio_risk(optimized_weights, std_devs)
 
+# Set the x-coordinates from 0 to 1 with a step size of 0.01
 x = np.arange(0, 1, 0.01)
 
-# Calculate corresponding portfolio risk for each weight of Stock A (assuming 3 stocks)
+# Calculate corresponding portfolio risk for each combination of weights
 y = np.zeros_like(x)
 for i, weight_A in enumerate(x):
-    # Calculate risk for portfolio with weight_A on Stock A, (1 - weight_A) on Stock B and the remaining on Stock C
-    weight_B = 1 - weight_A
-    weight_C = 1 - weight_A - weight_B  # Ensure weights sum to 1
-    weights = [weight_A, weight_B, weight_C]
+    # Calculate remaining weights for other stocks
+    weights = np.array([weight_A] + [(1 - weight_A) / (num_stocks - 1)] * (num_stocks - 1))  # Ensure sum of weights = 1
     y[i] = calculate_portfolio_risk(weights, std_devs)
 
 # Find the lowest point on the graph

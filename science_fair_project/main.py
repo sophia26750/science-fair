@@ -1,6 +1,14 @@
 import streamlit as st 
 import numpy as np
 from scipy.optimize import minimize
+import matplotlib.pyplot as plt
+
+
+
+# Function to calculate portfolio risk for a given set of weights
+def calculate_portfolio_risk(weights, std_devs):
+    # Portfolio risk formula: sqrt(w1^2 * sigma1^2 + w2^2 * sigma2^2 + ...)
+    return np.sqrt(np.sum(np.square(weights) * np.square(std_devs)))
 
 # Define the objective function to maximize (expected return)
 def maximize_expected_return(weights):
@@ -100,10 +108,62 @@ try:
     
     # Print results
     st.write("\nOptimal stock weighting:")
-    st.write([round(weight, 5) for weight in result.x])
+    optimized_weights = ([round(weight, 5) for weight in result.x])
+    st.write(optimized_weights)
     st.write("\nMaximum expected return, as a percentage:")
     st.write(round(-result.fun, 5))
 except NameError:
     st.markdown(" ")
 except ValueError:
     st.markdown(" ")
+
+st.markdown("Graph of Portfolio Risk as a Function of Proportion of Stock A")
+
+try:
+
+    # Calculate the risk of the optimized portfolio
+    optimized_risk = calculate_portfolio_risk(optimized_weights, std_devs)
+
+    # Set the x-coordinates from 0 to 1 with a step size of 0.01
+    x = np.arange(0, 1, 0.01)
+
+    # Calculate corresponding portfolio risk for each combination of weights
+    y = np.zeros_like(x)
+    for i, weight_A in enumerate(x):
+        # Calculate remaining weights for other stocks
+        weights = np.array([weight_A] + [(1 - weight_A) / (num_stocks - 1)] * (num_stocks - 1))  # Ensure sum of weights = 1
+        y[i] = calculate_portfolio_risk(weights, std_devs)
+
+    # Find the lowest point on the graph
+    lowest_point_idx = np.argmin(y)
+    lowest_point_x = x[lowest_point_idx]
+    lowest_point_y = y[lowest_point_idx]
+
+    # Set labels for the plot
+    plt.xlabel('Weight of Stock A')
+    plt.ylabel('Portfolio Risk (%)')
+
+    # Plot the points for the risk curve
+    plt.plot(x, y, label="Risk Curve")
+
+    # Mark the lowest point on the graph (min risk)
+    plt.plot(lowest_point_x, lowest_point_y, 'ro', label=f'Lowest Risk: ({lowest_point_x:.2f}, {lowest_point_y:.2f})')
+
+    # Annotate the coordinates of the lowest point
+    plt.annotate(f'({lowest_point_x:.2f}, {lowest_point_y:.2f})', (lowest_point_x, lowest_point_y),
+                textcoords="offset points", xytext=(4, 10), ha='center')
+
+    # Plot the optimized portfolio result (using the calculated risk)
+    plt.plot(np.sum(optimized_weights), optimized_risk, 'bo', label=f'Optimized Portfolio: ({np.sum(optimized_weights):.2f}, {optimized_risk:.2f})')
+
+    # Add labels and legend
+    plt.legend()
+    plt.title("Risk Curve with Optimized Portfolio")
+
+    # Show the plot
+    st.pyplot(plt)
+
+except NameError:
+    st.markdown("Finish Part One")
+except ValueError:
+    st.markdown("Finish Part One")
