@@ -160,7 +160,7 @@ try:
 
     # Add labels and legend
     plt.legend()
-    plt.title("Risk Curve with Optimized Portfolio")
+    plt.title("Graph of Portfolio Risk as a Function of Proportion of Stock 1")
 
     # Show the plot
     st.pyplot(plt)
@@ -169,3 +169,48 @@ except NameError:
     st.markdown("Finish Part One")
 except ValueError:
     st.markdown("Finish Part One")
+
+
+# Now we will graph the optimal weights and risk for each stock
+
+st.markdown("---")
+st.markdown("Graph of Optimal Proportions of Stocks Based on Portfolio Risk Tolerance")
+
+# Generate x-coordinates (risk tolerance values)
+x = np.arange(9, 40, 0.1)  # Adjust the risk tolerance range as needed
+
+# Calculate y-coordinates for the optimal weight of each stock (just for illustration)
+y = np.zeros((num_stocks, len(x)))
+
+# Calculate the optimal weights for each risk tolerance value
+for i, risk in enumerate(x):
+    # Update the risk constraint for each value of x (risk tolerance)
+    constraints[1] = {'type': 'ineq', 'fun': lambda weights: -calculate_portfolio_risk(weights, std_devs) + risk}
+
+    # Re-optimize for this risk tolerance
+    result = minimize(maximize_expected_return, initial_weights, method='SLSQP', 
+                      constraints=constraints, bounds=weight_bounds, 
+                      options={'ftol': 1e-6, 'maxiter': 10000})
+
+    # Store the optimized weights for each stock
+    for j in range(num_stocks):
+        y[j, i] = result.x[j]
+
+# Plot the results for each stock
+for j in range(num_stocks):
+    plt.plot(x, y[j], label=f'Stock {j+1}')
+
+# Add legend for intersection
+intersection_x = x[np.argmin(np.abs(y[0] - y[1]))]
+intersection_y = y[0, np.argmin(np.abs(y[0] - y[1]))]
+legend_label = f'Intersection: ({intersection_x:.2f}, {intersection_y:.2f})'
+plt.legend(loc='best')
+
+# Add labels and legend
+plt.xlabel('Portfolio Risk Tolerance')
+plt.ylabel('Optimal Weight of Stocks')
+plt.legend(loc='best')
+plt.title("Graph of Optimal Proportions of Stocks Based on Portfolio Risk Tolerance")
+
+# Show the plot
+st.pyplot(plt)

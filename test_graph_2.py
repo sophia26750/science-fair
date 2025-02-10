@@ -33,11 +33,11 @@ def max_weight_constraint(weights):
 def min_weight_constraint(weights):
     return np.min(weights) - 0.05  # No stock can have less than 5%
 
-# Input the number of stocks in the portfolio
-num_stocks = 4  # Assuming 4 stocks
-returns = [23, 12, 43, 4]  # Expected returns for the stocks
-std_devs = [12, 3, 43, 23]  # Standard deviations for the stocks
-risk_tolerance = 34  # Portfolio risk tolerance
+# Input the number of stocks in the portfolio and their properties
+num_stocks = 4  # Update based on user input
+returns = [23, 12, 43, 4]  # Update based on user input
+std_devs = [12, 3, 43, 23]  # Update based on user input
+risk_tolerance = 34  # Portfolio risk tolerance, update based on user input
 
 # Specify the initial guess for weights (balanced portfolio as a starting point)
 initial_weights = np.ones(num_stocks) / num_stocks  # Equal initial weights
@@ -78,10 +78,7 @@ print("\nOptimized portfolio risk:", optimized_risk)
 x = np.arange(9, 40, 0.1)  # Adjust the risk tolerance range as needed
 
 # Calculate y-coordinates for the optimal weight of each stock (just for illustration)
-y1 = np.zeros_like(x)
-y2 = np.zeros_like(x)
-y3 = np.zeros_like(x)
-y4 = np.zeros_like(x)
+y = np.zeros((num_stocks, len(x)))
 
 # Calculate the optimal weights for each risk tolerance value
 for i, risk in enumerate(x):
@@ -94,31 +91,21 @@ for i, risk in enumerate(x):
                       options={'ftol': 1e-6, 'maxiter': 10000})
 
     # Store the optimized weights for each stock
-    y1[i] = result.x[0]
-    y2[i] = result.x[1]
-    y3[i] = result.x[2]
-    y4[i] = result.x[3]
+    for j in range(num_stocks):
+        y[j, i] = result.x[j]
 
-intersection_x = x[np.argmin(np.abs(y1 - y2))]
-intersection_y = y1[np.argmin(np.abs(y1 - y2))]
+# Plot the results for each stock
+for j in range(num_stocks):
+    plt.plot(x, y[j], label=f'Stock {j+1}')
 
-# Add this line before displaying the plot to adjust the y-axis range
-plt.ylim(0, 3)  # Adjust the range as needed
-
-
-# Plot the results
-plt.plot(x, y1, label='Stock 1')
-plt.plot(x, y2, label='Stock 2')
-plt.plot(x, y3, label='Stock 3')
-plt.plot(x, y4, label='Stock 4')
+# Add legend for intersection
+intersection_x = x[np.argmin(np.abs(y[0] - y[1]))]
+intersection_y = y[0, np.argmin(np.abs(y[0] - y[1]))]
 legend_label = f'Intersection: ({intersection_x:.2f}, {intersection_y:.2f})'
-plt.legend(labels=['Stock A', 'Stock B', legend_label], loc='best')
+plt.legend(loc='best')
 
-# Mark the optimized portfolio's risk tolerance and stock weights
-# plt.plot(risk_tolerance, optimized_weights[0], 'ro', label=f'Optimized Portfolio: Stock 1 ({optimized_weights[0]})')
-# plt.plot(risk_tolerance, optimized_weights[1], 'bo', label=f'Optimized Portfolio: Stock 2 ({optimized_weights[1]})')
-# plt.plot(risk_tolerance, optimized_weights[2], 'go', label=f'Optimized Portfolio: Stock 3 ({optimized_weights[2]})')
-# plt.plot(risk_tolerance, optimized_weights[3], 'yo', label=f'Optimized Portfolio: Stock 4 ({optimized_weights[3]})')
+# Adjust the y-axis range
+plt.ylim(0, 3)  # Adjust the range as needed
 
 # Add labels and legend
 plt.xlabel('Portfolio Risk Tolerance')
