@@ -324,28 +324,32 @@ except ValueError:
     st.markdown("Finish Part One")
 
 
+try: 
+    st.markdown("---")
+    st.markdown("Graph of Optimal Stock Weights as a Function of the Correlation Coefficient")
+    # Create a new figure for the second graph
+    plt.figure()
 
-st.markdown("---")
-st.markdown("Graph of Optimal Stock Weights as a Function of the Correlation Coefficient")
-# Create a new figure for the second graph
-plt.figure()
+    # Generate correlation coefficients from -1 to 1 with a step size of 0.1
+    x = np.arange(-1, 1.1, 0.1)
 
-# Generate correlation coefficients from -1 to 1 with a step size of 0.1
-x = np.arange(-1, 1.1, 0.1)
+    # Calculate optimal weights for the stocks
+    weights_optimized = [optimize_portfolio(coeff) for coeff in x]
 
-# Calculate optimal weights for the stocks
-weights_optimized = [optimize_portfolio(coeff) for coeff in x]
+    # Extract weights for each stock
+    weights_stocks = [[round(weights[i], 5) for weights in weights_optimized] for i in range(num_stocks)]
 
-# Extract weights for each stock
-weights_stocks = [[round(weights[i], 5) for weights in weights_optimized] for i in range(num_stocks)]
+    # Plotting the results
+    plt.xlabel('Correlation Coefficient Between Stocks')
+    plt.ylabel('Optimal Weight of Stocks')
 
-# Plotting the results
-plt.xlabel('Correlation Coefficient Between Stocks')
-plt.ylabel('Optimal Weight of Stocks')
+    for i in range(num_stocks):
+        plt.plot(x, weights_stocks[i], label=f"Stock {i + 1}")
 
-for i in range(num_stocks):
-    plt.plot(x, weights_stocks[i], label=f"Stock {i + 1}")
-
-plt.legend()
-# Show the plot
-st.pyplot(plt)
+    plt.legend()
+    # Show the plot
+    st.pyplot(plt)
+except NameError:
+    st.markdown("Finish Part One")
+except ValueError:
+    st.markdown("Finish Part One")
