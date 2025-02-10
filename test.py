@@ -44,7 +44,6 @@ std_devs = [float(input(f"Enter the standard deviation of Stock {i + 1}: "))
 risk_tolerance = float(input("Enter the risk tolerance: "))
 
 
-
 # Specify the initial guess for weights (balanced portfolio as a starting point)
 initial_weights = np.ones(num_stocks) / num_stocks  # Equal initial weights
 

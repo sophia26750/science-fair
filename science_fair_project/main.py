@@ -117,6 +117,8 @@ except NameError:
 except ValueError:
     st.markdown(" ")
 
+st.markdown("---")
+
 st.markdown("Graph of Portfolio Risk as a Function of Proportion of Stock A")
 
 try:
