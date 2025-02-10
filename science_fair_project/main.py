@@ -71,6 +71,40 @@ def maximize_return(correlation_matrix):
 
     return -1 * result.fun
 
+def optimize_portfolio(correlation):
+    # Define the objective function to maximize (expected return)
+    def expected_return(weights):
+        return -1 * sum(weights[i] * returns[i] for i in range(len(weights)))
+
+    # Define the budget constraint
+    def budget_constraint(weights):
+        return sum(weights) - 1
+
+    # Define the risk constraint
+    def risk_constraint(weights):
+        portfolio_variance = sum((weights[i] ** 2) * (std_devs[i] ** 2) for i in range(len(weights)))
+        for i in range(len(weights)):
+            for j in range(i + 1, len(weights)):
+                portfolio_variance += 2 * weights[i] * weights[j] * std_devs[i] * std_devs[j] * correlation
+        return -(portfolio_variance - risk_tolerance ** 2)
+
+    # Specify the initial guess and bounds for weights
+    initial_weights = [1/len(returns)] * len(returns)
+    weight_bounds = [(0, 1)] * len(returns)
+
+    # Define the constraints as a list of dictionaries
+    constraints = [
+        {'type': 'eq', 'fun': budget_constraint},  
+        {'type': 'ineq', 'fun': risk_constraint}
+    ]
+
+    # Execute the optimization to find the optimal weights
+    result = minimize(expected_return, initial_weights, method='SLSQP', 
+                      constraints=constraints, bounds=weight_bounds,
+                      options={'ftol': 1e-6})
+
+    return result.x
+
 
 st.markdown("# Lagrangian Multipliers for Uncorrelated stocks")
 st.markdown("---")
@@ -288,3 +322,30 @@ except NameError:
     st.markdown("Finish Part One")
 except ValueError:
     st.markdown("Finish Part One")
+
+
+
+st.markdown("---")
+st.markdown("Graph of Optimal Stock Weights as a Function of the Correlation Coefficient")
+# Create a new figure for the second graph
+plt.figure()
+
+# Generate correlation coefficients from -1 to 1 with a step size of 0.1
+x = np.arange(-1, 1.1, 0.1)
+
+# Calculate optimal weights for the stocks
+weights_optimized = [optimize_portfolio(coeff) for coeff in x]
+
+# Extract weights for each stock
+weights_stocks = [[round(weights[i], 5) for weights in weights_optimized] for i in range(num_stocks)]
+
+# Plotting the results
+plt.xlabel('Correlation Coefficient Between Stocks')
+plt.ylabel('Optimal Weight of Stocks')
+
+for i in range(num_stocks):
+    plt.plot(x, weights_stocks[i], label=f"Stock {i + 1}")
+
+plt.legend()
+# Show the plot
+st.pyplot(plt)
