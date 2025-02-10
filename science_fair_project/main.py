@@ -37,6 +37,40 @@ def max_weight_constraint(weights):
 def min_weight_constraint(weights):
     return np.min(weights) - 0.05  # No stock can have less than 5%
 
+def maximize_return(correlation_matrix):
+    # Define the objective function to maximize (expected return)
+    def expected_return(weights):
+        return -1 * sum([w * r for w, r in zip(weights, returns)])
+
+    # Define the budget constraint (weights sum to 1)
+    def budget_constraint(weights):
+        return sum(weights) - 1
+
+    # Define the risk constraint
+    def risk_constraint(weights):
+        variance = sum([
+            w1 * w2 * correlation_matrix[i][j] * std_devs[i] * std_devs[j]
+            for i, w1 in enumerate(weights) for j, w2 in enumerate(weights)
+        ])
+        return -(variance - risk_tolerance**2)
+
+    # Initial guess and bounds for weights
+    initial_weights = [1/3] * len(returns)
+    weight_bounds = [(0, 1)] * len(returns)
+
+    # Constraints
+    constraints = [
+        {'type': 'eq', 'fun': budget_constraint},
+        {'type': 'ineq', 'fun': risk_constraint}
+    ]
+
+    # Optimization
+    result = minimize(expected_return, initial_weights, method='SLSQP',
+                      constraints=constraints, bounds=weight_bounds,
+                      options={'ftol': 1e-6})
+
+    return -1 * result.fun
+
 
 st.markdown("# Lagrangian Multipliers for Uncorrelated stocks")
 st.markdown("---")
@@ -176,41 +210,81 @@ except ValueError:
 st.markdown("---")
 st.markdown("Graph of Optimal Proportions of Stocks Based on Portfolio Risk Tolerance")
 
-# Generate x-coordinates (risk tolerance values)
-x = np.arange(9, 40, 0.1)  # Adjust the risk tolerance range as needed
+try: 
+    # Create a new figure for the second graph
+    plt.figure()
 
-# Calculate y-coordinates for the optimal weight of each stock (just for illustration)
-y = np.zeros((num_stocks, len(x)))
+    # Generate x-coordinates (risk tolerance values)
+    x = np.arange(9, 40, 0.1)  # Adjust the risk tolerance range as needed
 
-# Calculate the optimal weights for each risk tolerance value
-for i, risk in enumerate(x):
-    # Update the risk constraint for each value of x (risk tolerance)
-    constraints[1] = {'type': 'ineq', 'fun': lambda weights: -calculate_portfolio_risk(weights, std_devs) + risk}
+    # Calculate y-coordinates for the optimal weight of each stock (just for illustration)
+    y = np.zeros((num_stocks, len(x)))
 
-    # Re-optimize for this risk tolerance
-    result = minimize(maximize_expected_return, initial_weights, method='SLSQP', 
-                      constraints=constraints, bounds=weight_bounds, 
-                      options={'ftol': 1e-6, 'maxiter': 10000})
+    # Calculate the optimal weights for each risk tolerance value
+    for i, risk in enumerate(x):
+        # Update the risk constraint for each value of x (risk tolerance)
+        constraints[1] = {'type': 'ineq', 'fun': lambda weights: -calculate_portfolio_risk(weights, std_devs) + risk}
 
-    # Store the optimized weights for each stock
+        # Re-optimize for this risk tolerance
+        result = minimize(maximize_expected_return, initial_weights, method='SLSQP', 
+                        constraints=constraints, bounds=weight_bounds, 
+                        options={'ftol': 1e-6, 'maxiter': 10000})
+
+        # Store the optimized weights for each stock
+        for j in range(num_stocks):
+            y[j, i] = result.x[j]
+
+    # Plot the results for each stock
     for j in range(num_stocks):
-        y[j, i] = result.x[j]
+        plt.plot(x, y[j], label=f'Stock {j+1}')
 
-# Plot the results for each stock
-for j in range(num_stocks):
-    plt.plot(x, y[j], label=f'Stock {j+1}')
+    # Add legend for intersection
+    intersection_x = x[np.argmin(np.abs(y[0] - y[1]))]
+    intersection_y = y[0, np.argmin(np.abs(y[0] - y[1]))]
+    legend_label = f'Intersection: ({intersection_x:.2f}, {intersection_y:.2f})'
+    plt.legend(loc='best')
 
-# Add legend for intersection
-intersection_x = x[np.argmin(np.abs(y[0] - y[1]))]
-intersection_y = y[0, np.argmin(np.abs(y[0] - y[1]))]
-legend_label = f'Intersection: ({intersection_x:.2f}, {intersection_y:.2f})'
-plt.legend(loc='best')
+    # Add labels and legend
+    plt.xlabel('Portfolio Risk Tolerance')
+    plt.ylabel('Optimal Weight of Stocks')
+    plt.legend(loc='best')
+    plt.title("Graph of Optimal Proportions of Stocks Based on Portfolio Risk Tolerance")
 
-# Add labels and legend
-plt.xlabel('Portfolio Risk Tolerance')
-plt.ylabel('Optimal Weight of Stocks')
-plt.legend(loc='best')
-plt.title("Graph of Optimal Proportions of Stocks Based on Portfolio Risk Tolerance")
+    # Show the plot
+    st.pyplot(plt)
+except NameError:
+    st.markdown("Finish Part One")
+except ValueError:
+    st.markdown("Finish Part One")
 
-# Show the plot
-st.pyplot(plt)
+st.markdown("---")
+st.markdown("Graph of Maximum Portfolio Expected Return as a Function of Correlation Coefficient")
+
+try: 
+# Create a new figure for the second graph
+    plt.figure()
+
+    # Generate correlation matrices and calculate the maximum expected return for each
+    correlation_values = np.round(np.arange(-1, 1.1, 0.1), 1)
+    max_returns = []
+
+    for corr in correlation_values:
+        correlation_matrix = np.array([
+            [1, corr, corr],
+            [corr, 1, corr],
+            [corr, corr, 1]
+        ])
+        max_return = maximize_return(correlation_matrix)
+        max_returns.append(round(max_return, 5))
+
+    # Plotting the results
+    plt.xlabel('Correlation Coefficient Between Stocks')
+    plt.ylabel('Maximum Expected Portfolio Return (%)')
+
+    plt.plot(correlation_values, max_returns)
+    # Show the plot
+    st.pyplot(plt)
+except NameError:
+    st.markdown("Finish Part One")
+except ValueError:
+    st.markdown("Finish Part One")
