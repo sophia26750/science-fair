@@ -102,6 +102,10 @@ for i, risk in enumerate(x):
 intersection_x = x[np.argmin(np.abs(y1 - y2))]
 intersection_y = y1[np.argmin(np.abs(y1 - y2))]
 
+# Add this line before displaying the plot to adjust the y-axis range
+plt.ylim(0, 3)  # Adjust the range as needed
+
+
 # Plot the results
 plt.plot(x, y1, label='Stock 1')
 plt.plot(x, y2, label='Stock 2')
