@@ -152,6 +152,7 @@ except ValueError:
     st.markdown(" ")
 
 
+
 try: 
     # Specify the initial guess for weights (balanced portfolio as a starting point)
     initial_weights = np.ones(num_stocks) / num_stocks  # Equal initial weights
@@ -168,11 +169,11 @@ try:
     {'type': 'ineq', 'fun': min_weight_constraint}  # Minimum weight constraint to force allocation to all stocks
     ]
 
-    # Execute the optimization with more iterations and higher precision
+  # Execute the optimization with more iterations and higher precision
     result = minimize(maximize_expected_return, initial_weights, method='SLSQP', 
-                    constraints=constraints, bounds=weight_bounds, 
-                    options={'ftol': 1e-6, 'maxiter': 10000})  # Increased max iterations
-
+                  constraints=constraints, bounds=weight_bounds, 
+                  options={'ftol': 1e-6, 'maxiter': 10000})  # Increased max iterations
+    
     # Print results
     st.write("\nOptimal stock weighting:")
     optimized_weights = ([round(weight, 5) for weight in result.x])
@@ -186,11 +187,12 @@ except ValueError:
 
 st.markdown("---")
 
-try: 
+# st.markdown("Graph of Portfolio Risk as a Function of Proportion of Stock A")
+
+try:
+
     # Calculate the risk of the optimized portfolio
     optimized_risk = calculate_portfolio_risk(optimized_weights, std_devs)
-
-    plt.figure()
 
     # Set the x-coordinates from 0 to 1 with a step size of 0.01
     x = np.arange(0, 1, 0.01)
@@ -221,8 +223,8 @@ try:
     plt.annotate(f'({lowest_point_x:.2f}, {lowest_point_y:.2f})', (lowest_point_x, lowest_point_y),
                 textcoords="offset points", xytext=(4, 10), ha='center')
 
-    # Plot the optimized portfolio result (using the calculated risk)
-    plt.plot(np.sum(optimized_weights), optimized_risk, 'bo', label=f'Optimized Portfolio: ({np.sum(optimized_weights):.2f}, {optimized_risk:.2f})')
+    # # Plot the optimized portfolio result (using the calculated risk)
+    # plt.plot(np.sum(optimized_weights), optimized_risk, 'bo', label=f'Optimized Portfolio: ({np.sum(optimized_weights):.2f}, {optimized_risk:.2f})')
 
     # Add labels and legend
     plt.legend()
@@ -230,12 +232,11 @@ try:
 
     # Show the plot
     st.pyplot(plt)
-except ValueError:
-    st.markdown("_Finish part one to continue_")
+
 except NameError:
-    st.markdown("_Finish part one to continue_")
-
-
+    st.markdown("Finish Part One")
+except ValueError:
+    st.markdown("Finish Part One")
 
 
 # Now we will graph the optimal weights and risk for each stock
@@ -243,12 +244,12 @@ except NameError:
 st.markdown("---")
 # st.markdown("Graph of Optimal Proportions of Stocks Based on Portfolio Risk Tolerance")
 
-try:
+try: 
     # Create a new figure for the second graph
     plt.figure()
-    plt.xlim(8, 30)
+
     # Generate x-coordinates (risk tolerance values)
-    x = np.arange(9, 30, 0.1)  # Adjust the risk tolerance range as needed
+    x = np.arange(9, 40, 0.1)  # Adjust the risk tolerance range as needed
 
     # Calculate y-coordinates for the optimal weight of each stock (just for illustration)
     y = np.zeros((num_stocks, len(x)))
@@ -277,7 +278,7 @@ try:
     legend_label = f'Intersection: ({intersection_x:.2f}, {intersection_y:.2f})'
     plt.legend(loc='best')
 
-
+   
     # Add labels and legend
     plt.xlabel('Portfolio Risk Tolerance')
     plt.ylabel('Optimal Weight of Stocks')
@@ -287,17 +288,15 @@ try:
     # Show the plot
     st.pyplot(plt)
 except NameError:
-    st.markdown(" ")
+    st.markdown("Finish Part One")
 except ValueError:
-    st.markdown(" ")
-
-
+    st.markdown("Finish Part One")
 
 st.markdown("---")
 # st.markdown("Graph of Maximum Portfolio Expected Return as a Function of Correlation Coefficient")
 
-try:
-    # Create a new figure for the second graph
+try: 
+# Create a new figure for the second graph
     plt.figure()
 
     # Generate correlation matrices and calculate the maximum expected return for each
@@ -318,19 +317,19 @@ try:
     plt.ylabel('Maximum Expected Portfolio Return (%)')
 
     plt.title("Graph of Maximum Portfolio Expected Return as a Function of Correlation Coefficient")
-
+    
     plt.plot(correlation_values, max_returns)
     # Show the plot
     st.pyplot(plt)
 except NameError:
-    st.markdown(" ")
+    st.markdown("Finish Part One")
 except ValueError:
-    st.markdown(" ")
+    st.markdown("Finish Part One")
 
 
 st.markdown("---")
 
-try:
+try: 
     # Create a new figure for the second graph
     plt.figure()
 
@@ -349,7 +348,7 @@ try:
 
 
     plt.title("Graph of Optimal Stock Weights as a Function of the Correlation Coefficient")
-
+    
     for i in range(num_stocks):
         plt.plot(x, weights_stocks[i], label=f"Stock {i + 1}")
 
@@ -357,6 +356,6 @@ try:
     # Show the plot
     st.pyplot(plt)
 except NameError:
-    st.markdown(" ")
+    st.markdown("Finish Part One")
 except ValueError:
-    st.markdown(" ")
+    st.markdown("Finish Part One")
