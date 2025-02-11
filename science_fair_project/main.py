@@ -186,54 +186,51 @@ except ValueError:
 
 st.markdown("---")
 
-try: 
-    # Calculate the risk of the optimized portfolio
-    optimized_risk = calculate_portfolio_risk(optimized_weights, std_devs)
 
-    plt.figure()
+# Calculate the risk of the optimized portfolio
+optimized_risk = calculate_portfolio_risk(optimized_weights, std_devs)
 
-    # Set the x-coordinates from 0 to 1 with a step size of 0.01
-    x = np.arange(0, 1, 0.01)
+plt.figure()
 
-    # Calculate corresponding portfolio risk for each combination of weights
-    y = np.zeros_like(x)
-    for i, weight_A in enumerate(x):
-        # Calculate remaining weights for other stocks
-        weights = np.array([weight_A] + [(1 - weight_A) / (num_stocks - 1)] * (num_stocks - 1))  # Ensure sum of weights = 1
-        y[i] = calculate_portfolio_risk(weights, std_devs)
+# Set the x-coordinates from 0 to 1 with a step size of 0.01
+x = np.arange(0, 1, 0.01)
+6
+# Calculate corresponding portfolio risk for each combination of weights
+y = np.zeros_like(x)
+for i, weight_A in enumerate(x):
+    # Calculate remaining weights for other stocks
+    weights = np.array([weight_A] + [(1 - weight_A) / (num_stocks - 1)] * (num_stocks - 1))  # Ensure sum of weights = 1
+    y[i] = calculate_portfolio_risk(weights, std_devs)
 
-    # Find the lowest point on the graph
-    lowest_point_idx = np.argmin(y)
-    lowest_point_x = x[lowest_point_idx]
-    lowest_point_y = y[lowest_point_idx]
+# Find the lowest point on the graph
+lowest_point_idx = np.argmin(y)
+lowest_point_x = x[lowest_point_idx]
+lowest_point_y = y[lowest_point_idx]
 
-    # Set labels for the plot
-    plt.xlabel('Weight of Stock A')
-    plt.ylabel('Portfolio Risk (%)')
+# Set labels for the plot
+plt.xlabel('Weight of Stock A')
+plt.ylabel('Portfolio Risk (%)')
 
-    # Plot the points for the risk curve
-    plt.plot(x, y, label="Risk Curve")
+# Plot the points for the risk curve
+plt.plot(x, y, label="Risk Curve")
 
-    # Mark the lowest point on the graph (min risk)
-    plt.plot(lowest_point_x, lowest_point_y, 'ro', label=f'Lowest Risk: ({lowest_point_x:.2f}, {lowest_point_y:.2f})')
+# Mark the lowest point on the graph (min risk)
+plt.plot(lowest_point_x, lowest_point_y, 'ro', label=f'Lowest Risk: ({lowest_point_x:.2f}, {lowest_point_y:.2f})')
 
-    # Annotate the coordinates of the lowest point
-    plt.annotate(f'({lowest_point_x:.2f}, {lowest_point_y:.2f})', (lowest_point_x, lowest_point_y),
-                textcoords="offset points", xytext=(4, 10), ha='center')
+# Annotate the coordinates of the lowest point
+plt.annotate(f'({lowest_point_x:.2f}, {lowest_point_y:.2f})', (lowest_point_x, lowest_point_y),
+            textcoords="offset points", xytext=(4, 10), ha='center')
 
-    # Plot the optimized portfolio result (using the calculated risk)
-    plt.plot(np.sum(optimized_weights), optimized_risk, 'bo', label=f'Optimized Portfolio: ({np.sum(optimized_weights):.2f}, {optimized_risk:.2f})')
+# Plot the optimized portfolio result (using the calculated risk)
+plt.plot(np.sum(optimized_weights), optimized_risk, 'bo', label=f'Optimized Portfolio: ({np.sum(optimized_weights):.2f}, {optimized_risk:.2f})')
 
-    # Add labels and legend
-    plt.legend()
-    plt.title("Graph of Portfolio Risk as a Function of Proportion of Stock 1")
+# Add labels and legend
+plt.legend()
+plt.title("Graph of Portfolio Risk as a Function of Proportion of Stock 1")
 
-    # Show the plot
-    st.pyplot(plt)
-except ValueError:
-    st.markdown("_Finish part one to continue_")
-except NameError:
-    st.markdown("_Finish part one to continue_")
+# Show the plot
+st.pyplot(plt)
+
 
 
 
@@ -294,7 +291,6 @@ except ValueError:
 
 
 st.markdown("---")
-# st.markdown("Graph of Maximum Portfolio Expected Return as a Function of Correlation Coefficient")
 
 try:
     # Create a new figure for the second graph

@@ -143,13 +143,13 @@ result = minimize(maximize_expected_return, initial_weights, method='SLSQP',
                 options={'ftol': 1e-6, 'maxiter': 10000})  # Increased max iterations
 
 # Print results
-st.write("\nOptimal stock weighting:")
+print("\nOptimal stock weighting:")
 optimized_weights = ([round(weight, 5) for weight in result.x])
-st.write(optimized_weights)
-st.write("\nMaximum expected return, as a percentage:")
-st.write(round(-result.fun, 5))
+print(optimized_weights)
+print("\nMaximum expected return, as a percentage:")
+print(round(-result.fun, 5))
 
-st.markdown("---")
+
 
 # st.markdown("Graph of Portfolio Risk as a Function of Proportion of Stock A")
 
@@ -197,5 +197,5 @@ plt.legend()
 plt.title("Graph of Portfolio Risk as a Function of Proportion of Stock 1")
 
 # Show the plot
-st.pyplot(plt)
+plt.show()
 
