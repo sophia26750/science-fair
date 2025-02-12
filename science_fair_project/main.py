@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 # Function to calculate portfolio risk for a given set of weights
 def calculate_portfolio_risk(weights, std_devs):
-    # Portfolio risk formula: sqrt(w1^2 * sigma1^2 + w2^2 * sigma2^2 + ...)
+    # Portfolio risk formula
     return np.sqrt(np.sum(np.square(weights) * np.square(std_devs)))
 
 # Define the objective function to maximize (expected return)
@@ -109,19 +109,15 @@ def optimize_portfolio(correlation):
 st.markdown("# Lagrangian Multipliers for Uncorrelated stocks")
 st.markdown("---")
 
-# Input the number of stocks in the portfolio
 try: 
     str_num_stocks = st.text_input("Enter the number of stocks in the portfolio as an integer: ", placeholder="Type number here...")
     num_stocks = int(str_num_stocks)
-# num_stocks = int(input("Enter the number of stocks in the portfolio: "))
 except ValueError:
     st.text(" ")
 
 try: 
-
     returns = [st.number_input(f"Enter the expected return of {i + 1} Stocks as percent:", key = f"num {i} ", placeholder="0.00")
                                 for i in range(num_stocks)]  
-    # returns = float(str_returns)                                   
 except NameError:
     st.markdown("#### Please enter number of stocks to continue!")
 except ValueError:
@@ -131,7 +127,6 @@ try:
     
     std_devs = [st.number_input(f"Enter the standard deviation of Stock {i + 1}: ", key = f"num {i + num_stocks} ", placeholder="0.00")
                     for i in range(num_stocks)]
-    # std_devs = float(str_std_devs)
 except NameError:
     st.markdown(" ")
 except ValueError:
@@ -139,13 +134,10 @@ except ValueError:
 
 st.markdown("---")
 
-# Input the portfolio risk tolerance
 try:
     st.write("Select the risk tolerance: ")
     risk_tolerance = st.slider("You can use arrows if needed", 0, 100, 50)
     st.write(f"Chosen risk tolerance:  {risk_tolerance}")
-    # str_risk_tolerance = st.text_input("Enter the risk tolerance: ")
-    # risk_tolerance = float(str_risk_tolerance)
 except NameError:
     st.markdown(" ")
 except ValueError:
@@ -194,7 +186,7 @@ plt.figure()
 
 # Set the x-coordinates from 0 to 1 with a step size of 0.01
 x = np.arange(0, 1, 0.01)
-6
+
 # Calculate corresponding portfolio risk for each combination of weights
 y = np.zeros_like(x)
 for i, weight_A in enumerate(x):
