@@ -5,7 +5,7 @@ from scipy.optimize import minimize
 import matplotlib.pyplot as plt
 
 # Formatting the website
-st.markdown("# Lagrangian Multipliers for Uncorrelated stocks")
+st.markdown("# Lagrangian Portfolio Analysis")
 st.markdown("---")
 
 # Exception handling to eliminate error messages  
@@ -41,18 +41,22 @@ except NameError:
 except ValueError:
     st.markdown(" ")
 
-# 
+ 
 # Define the objective function to maximize (expected return)
 def maximize_expected_return(weights):
+    # Reduce concentration and encourage equal-weighted distribution
     diversification_penalty = 0.05 * np.sum(np.square(weights - 1/num_stocks))  
+    # Optimizer aims to maximize expected return and minimize diversification penalty 
     return -np.dot(weights, returns) + diversification_penalty  # Maximize return
 
 # Define the budget constraint
+# Ensures set of weights satisfies budget constraint
 def budget_constraint(weights):
     return np.sum(weights) - 1
 
-# Define the risk constraint
+# Define the risk constraint to ensure variance of portfolio does not exceed specified risk tolerance
 def risk_constraint(weights):
+    # The dot product to calculate total risk (variance)
     portfolio_risk = np.dot(np.square(weights), np.square(std_devs))
     return - (portfolio_risk - risk_tolerance ** 2)
 
@@ -64,7 +68,6 @@ def non_negative_return_constraint(weights):
 # Add a constraint to prevent any stock from getting too much weight
 def max_weight_constraint(weights):
     return np.max(weights) - 0.5  # No stock can have more than 50% of the portfolio
-
 
 # Add a constraint for minimum allocation per stock (e.g., 5%)
 def min_weight_constraint(weights):
@@ -92,7 +95,7 @@ try:
                     constraints=constraints, bounds=weight_bounds, 
                     options={'ftol': 1e-6, 'maxiter': 10000})  # Increased max iterations
 
-    # Print results
+    # Print results 
     st.write("\nOptimal stock weighting:")
     optimized_weights = ([round(weight, 5) for weight in result.x])
     st.write(optimized_weights)
@@ -106,7 +109,8 @@ except ValueError:
 st.markdown("---")
 
 # The following code will graph a portfolio risk as a function of proportion of stock A
-# Some functions may be reused from above but listed below are implmented starting this section. 
+# Preceding functions may be reused from above
+# Function below was implmented this section
 
 # Function to calculate portfolio risk for a given set of weights
 def calculate_portfolio_risk(weights, std_devs):
@@ -122,8 +126,9 @@ plt.figure()
 # Set the x-coordinates from 0 to 1 with a step size of 0.01
 x = np.arange(0, 1, 0.01)
 
-# Calculate corresponding portfolio risk for each combination of weights
 y = np.zeros_like(x)
+
+# Calculate corresponding portfolio risk for each combination of weights
 for i, weight_A in enumerate(x):
     # Calculate remaining weights for other stocks
     weights = np.array([weight_A] + [(1 - weight_A) / (num_stocks - 1)] * (num_stocks - 1))  # Ensure sum of weights = 1
@@ -191,6 +196,10 @@ try:
     for j in range(num_stocks):
         plt.plot(x, y[j], label=f'Stock {j+1}')
     
+    # Set the labels for the x-axis and y-axis
+    plt.xlabel('Portfolio Risk Tolerance')
+    plt.ylabel('Optimal Weight of Stocks')
+
     intersection_idx = np.argmin(np.abs(y[0] - y[1]))  # Minimize the absolute difference between Stock 1 and Stock 2
     intersection_x = x[intersection_idx]  # Get the x-coordinate of the intersection
     intersection_y = y[0, intersection_idx]  # Get the y-coordinate of the intersection (same for both stocks)
@@ -231,7 +240,7 @@ def maximize_return(correlation_matrix):
         return -(variance - risk_tolerance**2)
 
     # Initial guess and bounds for weights
-    initial_weights = [1/3] * len(returns)
+    initial_weights = [1/num_stocks] * len(returns)
     weight_bounds = [(0, 1)] * len(returns)
 
     # Constraints
