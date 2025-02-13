@@ -1,14 +1,48 @@
+# Libraries imported 
 import streamlit as st 
 import numpy as np
 from scipy.optimize import minimize
 import matplotlib.pyplot as plt
 
+# Formatting the website
+st.markdown("# Lagrangian Multipliers for Uncorrelated stocks")
+st.markdown("---")
 
+# Exception handling to eliminate error messages  
+try: 
+    str_num_stocks = st.text_input("Enter the number of stocks in the portfolio as an integer: ", placeholder="Type number here...")
+    num_stocks = int(str_num_stocks)
+except ValueError:
+    st.text(" ")
 
-# Function to calculate portfolio risk for a given set of weights
-def calculate_portfolio_risk(weights, std_devs):
-    # Portfolio risk formula
-    return np.sqrt(np.sum(np.square(weights) * np.square(std_devs)))
+try: 
+    returns = [st.number_input(f"Enter the expected return of {i + 1} Stocks as percent:", key = f"num {i} ")
+                                for i in range(num_stocks)]  
+except NameError:
+    st.markdown("#### Please enter number of stocks to continue!")
+except ValueError:
+    st.markdown(" ")
+
+try:
+    
+    std_devs = [st.number_input(f"Enter the standard deviation of Stock {i + 1}: ", key = f"num {i + num_stocks} ")
+                    for i in range(num_stocks)]
+except NameError:
+    st.markdown(" ")
+except ValueError:
+    st.markdown(" ")
+
+try:
+    st.write("Select the risk tolerance: ")
+    risk_tolerance = st.slider("You can use arrows if needed", 0, 100, 50)
+    st.write(f"Chosen risk tolerance:  {risk_tolerance}")
+except NameError:
+    st.markdown(" ")
+except ValueError:
+    st.markdown(" ")
+
+# Generalized SLSQP Algorithm for n Uncorrelated Stocks
+# The following are defining functions for the performance of calculating SLSQP Algorithms for user stocks
 
 # Define the objective function to maximize (expected return)
 def maximize_expected_return(weights):
@@ -19,7 +53,7 @@ def maximize_expected_return(weights):
 def budget_constraint(weights):
     return np.sum(weights) - 1
 
-# # Define the risk constraint
+# Define the risk constraint
 def risk_constraint(weights):
     portfolio_risk = np.dot(np.square(weights), np.square(std_devs))
     return - (portfolio_risk - risk_tolerance ** 2)
@@ -33,115 +67,10 @@ def non_negative_return_constraint(weights):
 def max_weight_constraint(weights):
     return np.max(weights) - 0.5  # No stock can have more than 50% of the portfolio
 
+
 # Add a constraint for minimum allocation per stock (e.g., 5%)
 def min_weight_constraint(weights):
     return np.min(weights) - 0.05  # No stock can have less than 5%
-
-def maximize_return(correlation_matrix):
-    # Define the objective function to maximize (expected return)
-    def expected_return(weights):
-        return -1 * sum([w * r for w, r in zip(weights, returns)])
-
-    # Define the budget constraint (weights sum to 1)
-    def budget_constraint(weights):
-        return sum(weights) - 1
-
-    # Define the risk constraint
-    def risk_constraint(weights):
-        variance = sum([
-            w1 * w2 * correlation_matrix[i][j] * std_devs[i] * std_devs[j]
-            for i, w1 in enumerate(weights) for j, w2 in enumerate(weights)
-        ])
-        return -(variance - risk_tolerance**2)
-
-    # Initial guess and bounds for weights
-    initial_weights = [1/3] * len(returns)
-    weight_bounds = [(0, 1)] * len(returns)
-
-    # Constraints
-    constraints = [
-        {'type': 'eq', 'fun': budget_constraint},
-        {'type': 'ineq', 'fun': risk_constraint}
-    ]
-
-    # Optimization
-    result = minimize(expected_return, initial_weights, method='SLSQP',
-                      constraints=constraints, bounds=weight_bounds,
-                      options={'ftol': 1e-6})
-
-    return -1 * result.fun
-
-def optimize_portfolio(correlation):
-    # Define the objective function to maximize (expected return)
-    def expected_return(weights):
-        return -1 * sum(weights[i] * returns[i] for i in range(len(weights)))
-
-    # Define the budget constraint
-    def budget_constraint(weights):
-        return sum(weights) - 1
-
-    # Define the risk constraint
-    def risk_constraint(weights):
-        portfolio_variance = sum((weights[i] ** 2) * (std_devs[i] ** 2) for i in range(len(weights)))
-        for i in range(len(weights)):
-            for j in range(i + 1, len(weights)):
-                portfolio_variance += 2 * weights[i] * weights[j] * std_devs[i] * std_devs[j] * correlation
-        return -(portfolio_variance - risk_tolerance ** 2)
-
-    # Specify the initial guess and bounds for weights
-    initial_weights = [1/len(returns)] * len(returns)
-    weight_bounds = [(0, 1)] * len(returns)
-
-    # Define the constraints as a list of dictionaries
-    constraints = [
-        {'type': 'eq', 'fun': budget_constraint},  
-        {'type': 'ineq', 'fun': risk_constraint}
-    ]
-
-    # Execute the optimization to find the optimal weights
-    result = minimize(expected_return, initial_weights, method='SLSQP', 
-                      constraints=constraints, bounds=weight_bounds,
-                      options={'ftol': 1e-6})
-
-    return result.x
-
-
-st.markdown("# Lagrangian Multipliers for Uncorrelated stocks")
-st.markdown("---")
-
-try: 
-    str_num_stocks = st.text_input("Enter the number of stocks in the portfolio as an integer: ", placeholder="Type number here...")
-    num_stocks = int(str_num_stocks)
-except ValueError:
-    st.text(" ")
-
-try: 
-    returns = [st.number_input(f"Enter the expected return of {i + 1} Stocks as percent:", key = f"num {i} ", placeholder="0.00")
-                                for i in range(num_stocks)]  
-except NameError:
-    st.markdown("#### Please enter number of stocks to continue!")
-except ValueError:
-    st.markdown(" ")
-
-try:
-    
-    std_devs = [st.number_input(f"Enter the standard deviation of Stock {i + 1}: ", key = f"num {i + num_stocks} ", placeholder="0.00")
-                    for i in range(num_stocks)]
-except NameError:
-    st.markdown(" ")
-except ValueError:
-    st.markdown(" ")
-
-st.markdown("---")
-
-try:
-    st.write("Select the risk tolerance: ")
-    risk_tolerance = st.slider("You can use arrows if needed", 0, 100, 50)
-    st.write(f"Chosen risk tolerance:  {risk_tolerance}")
-except NameError:
-    st.markdown(" ")
-except ValueError:
-    st.markdown(" ")
 
 
 try: 
@@ -177,6 +106,14 @@ except ValueError:
     st.markdown(" ")
 
 st.markdown("---")
+
+# The following code will graph a portfolio risk as a function of proportion of stock A
+# Some functions may be reused from above but listed below are implmented starting this section. 
+
+# Function to calculate portfolio risk for a given set of weights
+def calculate_portfolio_risk(weights, std_devs):
+    # Portfolio risk formula
+    return np.sqrt(np.sum(np.square(weights) * np.square(std_devs)))
 
 
 # Calculate the risk of the optimized portfolio
@@ -224,18 +161,14 @@ plt.title("Graph of Portfolio Risk as a Function of Proportion of Stock 1")
 st.pyplot(plt)
 
 
-
-
+st.markdown("---")
 
 # Now we will graph the optimal weights and risk for each stock
-
-st.markdown("---")
-# st.markdown("Graph of Optimal Proportions of Stocks Based on Portfolio Risk Tolerance")
 
 try:
     # Create a new figure for the second graph
     plt.figure()
-    plt.xlim(8, 30)
+    plt.xlim(8, 20)
     # Generate x-coordinates (risk tolerance values)
     x = np.arange(9, 30, 0.1)  # Adjust the risk tolerance range as needed
 
@@ -284,10 +217,44 @@ except ValueError:
 
 st.markdown("---")
 
+def maximize_return(correlation_matrix):
+    # Define the objective function to maximize (expected return)
+    def expected_return(weights):
+        return -1 * sum([w * r for w, r in zip(weights, returns)])
+
+    # Define the budget constraint (weights sum to 1)
+    def budget_constraint(weights):
+        return sum(weights) - 1
+
+    # Define the risk constraint
+    def risk_constraint(weights):
+        variance = sum([
+            w1 * w2 * correlation_matrix[i][j] * std_devs[i] * std_devs[j]
+            for i, w1 in enumerate(weights) for j, w2 in enumerate(weights)
+        ])
+        return -(variance - risk_tolerance**2)
+
+    # Initial guess and bounds for weights
+    initial_weights = [1/3] * len(returns)
+    weight_bounds = [(0, 1)] * len(returns)
+
+    # Constraints
+    constraints = [
+        {'type': 'eq', 'fun': budget_constraint},
+        {'type': 'ineq', 'fun': risk_constraint}
+    ]
+
+    # Optimization
+    result = minimize(expected_return, initial_weights, method='SLSQP',
+                      constraints=constraints, bounds=weight_bounds,
+                      options={'ftol': 1e-6})
+
+    return -1 * result.fun
+
+
 try:
     # Create a new figure for the second graph
     plt.figure()
-
     # Generate correlation matrices and calculate the maximum expected return for each
     correlation_values = np.round(np.arange(-1, 1.1, 0.1), 1)
     max_returns = []
@@ -318,10 +285,46 @@ except ValueError:
 
 st.markdown("---")
 
+
+def optimize_portfolio(correlation):
+    # Define the objective function to maximize (expected return)
+    def expected_return(weights):
+        return -1 * sum(weights[i] * returns[i] for i in range(len(weights)))
+
+    # Define the budget constraint
+    def budget_constraint(weights):
+        return sum(weights) - 1
+
+    # Define the risk constraint
+    def risk_constraint(weights):
+        portfolio_variance = sum((weights[i] ** 2) * (std_devs[i] ** 2) for i in range(len(weights)))
+        for i in range(len(weights)):
+            for j in range(i + 1, len(weights)):
+                portfolio_variance += 2 * weights[i] * weights[j] * std_devs[i] * std_devs[j] * correlation
+        return -(portfolio_variance - risk_tolerance ** 2)
+
+    # Specify the initial guess and bounds for weights
+    initial_weights = [1/len(returns)] * len(returns)
+    weight_bounds = [(0, 1)] * len(returns)
+
+    # Define the constraints as a list of dictionaries
+    constraints = [
+        {'type': 'eq', 'fun': budget_constraint},  
+        {'type': 'ineq', 'fun': risk_constraint}
+    ]
+
+    # Execute the optimization to find the optimal weights
+    result = minimize(expected_return, initial_weights, method='SLSQP', 
+                      constraints=constraints, bounds=weight_bounds,
+                      options={'ftol': 1e-6})
+
+    return result.x
+
+
 try:
     # Create a new figure for the second graph
     plt.figure()
-
+    plt.xlim(-1, 0.90)    
     # Generate correlation coefficients from -1 to 1 with a step size of 0.1
     x = np.arange(-1, 1.1, 0.1)
 
