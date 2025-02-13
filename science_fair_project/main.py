@@ -41,9 +41,7 @@ except NameError:
 except ValueError:
     st.markdown(" ")
 
-# Generalized SLSQP Algorithm for n Uncorrelated Stocks
-# The following are defining functions for the performance of calculating SLSQP Algorithms for user stocks
-
+# 
 # Define the objective function to maximize (expected return)
 def maximize_expected_return(weights):
     diversification_penalty = 0.05 * np.sum(np.square(weights - 1/num_stocks))  
@@ -192,19 +190,17 @@ try:
     # Plot the results for each stock
     for j in range(num_stocks):
         plt.plot(x, y[j], label=f'Stock {j+1}')
+    
+    intersection_idx = np.argmin(np.abs(y[0] - y[1]))  # Minimize the absolute difference between Stock 1 and Stock 2
+    intersection_x = x[intersection_idx]  # Get the x-coordinate of the intersection
+    intersection_y = y[0, intersection_idx]  # Get the y-coordinate of the intersection (same for both stocks)
 
-    # Add legend for intersection
-    intersection_x = x[np.argmin(np.abs(y[0] - y[1]))]
-    intersection_y = y[0, np.argmin(np.abs(y[0] - y[1]))]
-    legend_label = f'Intersection: ({intersection_x:.2f}, {intersection_y:.2f})'
-    plt.legend(loc='best')
+    # Plot the intersection point
+    plt.plot(intersection_x, intersection_y, 'ro')
 
-
-    # Add labels and legend
-    plt.xlabel('Portfolio Risk Tolerance')
-    plt.ylabel('Optimal Weight of Stocks')
-    plt.legend(loc='best')
-    plt.title("Graph of Optimal Proportions of Stocks Based on Portfolio Risk Tolerance")
+    # Add the intersection label to the legend
+    intersection_label = f'Intersection: ({intersection_x:.2f}, {intersection_y:.2f})'
+    plt.legend([f'Stock 1', f'Stock 2', intersection_label], loc='best')
 
     # Show the plot
     st.pyplot(plt)
