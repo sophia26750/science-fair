@@ -108,61 +108,65 @@ except ValueError:
 
 st.markdown("---")
 
-# The following code will graph a portfolio risk as a function of proportion of stock A
-# Preceding functions may be reused from above
-# Function below was implmented this section
+try: 
+    # The following code will graph a portfolio risk as a function of proportion of stock A
+    # Preceding functions may be reused from above
+    # Function below was implmented this section
 
-# Function to calculate portfolio risk for a given set of weights
-def calculate_portfolio_risk(weights, std_devs):
-    # Portfolio risk formula
-    return np.sqrt(np.sum(np.square(weights) * np.square(std_devs)))
+    # Function to calculate portfolio risk for a given set of weights
+    def calculate_portfolio_risk(weights, std_devs):
+        # Portfolio risk formula
+        return np.sqrt(np.sum(np.square(weights) * np.square(std_devs)))
 
 
-# Calculate the risk of the optimized portfolio
-optimized_risk = calculate_portfolio_risk(optimized_weights, std_devs)
+    # Calculate the risk of the optimized portfolio
+    optimized_risk = calculate_portfolio_risk(optimized_weights, std_devs)
 
-plt.figure()
+    plt.figure()
 
-# Set the x-coordinates from 0 to 1 with a step size of 0.01
-x = np.arange(0, 1, 0.01)
+    # Set the x-coordinates from 0 to 1 with a step size of 0.01
+    x = np.arange(0, 1, 0.01)
 
-y = np.zeros_like(x)
+    y = np.zeros_like(x)
 
-# Calculate corresponding portfolio risk for each combination of weights
-for i, weight_A in enumerate(x):
-    # Calculate remaining weights for other stocks
-    weights = np.array([weight_A] + [(1 - weight_A) / (num_stocks - 1)] * (num_stocks - 1))  # Ensure sum of weights = 1
-    y[i] = calculate_portfolio_risk(weights, std_devs)
+    # Calculate corresponding portfolio risk for each combination of weights
+    for i, weight_A in enumerate(x):
+        # Calculate remaining weights for other stocks
+        weights = np.array([weight_A] + [(1 - weight_A) / (num_stocks - 1)] * (num_stocks - 1))  # Ensure sum of weights = 1
+        y[i] = calculate_portfolio_risk(weights, std_devs)
 
-# Find the lowest point on the graph
-lowest_point_idx = np.argmin(y)
-lowest_point_x = x[lowest_point_idx]
-lowest_point_y = y[lowest_point_idx]
+    # Find the lowest point on the graph
+    lowest_point_idx = np.argmin(y)
+    lowest_point_x = x[lowest_point_idx]
+    lowest_point_y = y[lowest_point_idx]
 
-# Set labels for the plot
-plt.xlabel('Weight of Stock A')
-plt.ylabel('Portfolio Risk (%)')
+    # Set labels for the plot
+    plt.xlabel('Weight of Stock A')
+    plt.ylabel('Portfolio Risk (%)')
 
-# Plot the points for the risk curve
-plt.plot(x, y, label="Risk Curve")
+    # Plot the points for the risk curve
+    plt.plot(x, y, label="Risk Curve")
 
-# Mark the lowest point on the graph (min risk)
-plt.plot(lowest_point_x, lowest_point_y, 'ro', label=f'Lowest Risk: ({lowest_point_x:.2f}, {lowest_point_y:.2f})')
+    # Mark the lowest point on the graph (min risk)
+    plt.plot(lowest_point_x, lowest_point_y, 'ro', label=f'Lowest Risk: ({lowest_point_x:.2f}, {lowest_point_y:.2f})')
 
-# Annotate the coordinates of the lowest point
-plt.annotate(f'({lowest_point_x:.2f}, {lowest_point_y:.2f})', (lowest_point_x, lowest_point_y),
-            textcoords="offset points", xytext=(4, 10), ha='center')
+    # Annotate the coordinates of the lowest point
+    plt.annotate(f'({lowest_point_x:.2f}, {lowest_point_y:.2f})', (lowest_point_x, lowest_point_y),
+                textcoords="offset points", xytext=(4, 10), ha='center')
 
-# Plot the optimized portfolio result (using the calculated risk)
-plt.plot(np.sum(optimized_weights), optimized_risk, 'bo', label=f'Optimized Portfolio: ({np.sum(optimized_weights):.2f}, {optimized_risk:.2f})')
+    # Plot the optimized portfolio result (using the calculated risk)
+    plt.plot(np.sum(optimized_weights), optimized_risk, 'bo', label=f'Optimized Portfolio: ({np.sum(optimized_weights):.2f}, {optimized_risk:.2f})')
 
-# Add labels and legend
-plt.legend()
-plt.title("Graph of Portfolio Risk as a Function of Proportion of Stock 1")
+    # Add labels and legend
+    plt.legend()
+    plt.title("Graph of Portfolio Risk as a Function of Proportion of Stock 1")
 
-# Show the plot
-st.pyplot(plt)
-
+    # Show the plot
+    st.pyplot(plt)
+except NameError:
+    st.markdown(" ")
+except ValueError:
+    st.markdown(" ")
 
 st.markdown("---")
 
@@ -210,6 +214,7 @@ try:
     # Add the intersection label to the legend
     intersection_label = f'Intersection: ({intersection_x:.2f}, {intersection_y:.2f})'
     plt.legend([f'Stock 1', f'Stock 2', intersection_label], loc='best')
+    plt.title("Graph of Optimal Proportions of Stock A and B Based on Portfolio RIsk Tolerance")
 
     # Show the plot
     st.pyplot(plt)
